@@ -1,12 +1,12 @@
-import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from redis import asyncio as aioredis
+import os
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis_url = os.environ.get("REDIS_URL")
+    redis_url = os.environ["REDIS_URL"]
     r = aioredis.from_url(redis_url, decode_responses=True)
     try:
         await r.ping()
