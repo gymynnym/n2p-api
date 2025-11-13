@@ -4,10 +4,10 @@ from common.schemas import ResponseModel
 from starlette import status
 from redis import asyncio as aioredis
 from hackernews.schemas import HackerNewsItem
-from hackernews import service as hackernews_service, messages as hackernews_messages
+from hackernews import service as hackernews_service, messages as hackernews_messages, lifespan as hackernews_lifespan
 
 
-router = APIRouter(prefix="/hackernews", tags=["HackerNews"])
+router = APIRouter(prefix="/hackernews", tags=["HackerNews"], lifespan=hackernews_lifespan.lifespan)
 
 
 @router.get("/top", response_model=ResponseModel[list[HackerNewsItem]], status_code=status.HTTP_200_OK)
