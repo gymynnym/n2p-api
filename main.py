@@ -1,12 +1,14 @@
 from fastapi import FastAPI
 from lifespan import lifespan
 from hackernews.router import router as hackernews_router
+from geeknews.router import router as geeknews_router
 from starlette.middleware.cors import CORSMiddleware
 import os
 
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(hackernews_router)
+app.include_router(geeknews_router)
 
 app.add_middleware(
     CORSMiddleware,
