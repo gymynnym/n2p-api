@@ -35,7 +35,7 @@ async def scrap_items(r: aioredis.Redis) -> None:
 async def _map_element(submission_elem: SoupTag, subtext_elem: SoupTag) -> tuple[NewsItem, float]:
     item_id = int(submission_elem["id"])
     title = submission_elem.select_one(".title a").text.strip()
-    link = submission_elem.select_one(".title a")["href"]
+    url = submission_elem.select_one(".title a")["href"]
 
     points = subtext_elem.select_one(".score").text
     points = int(points.split()[0]) if points else 0
@@ -44,4 +44,4 @@ async def _map_element(submission_elem: SoupTag, subtext_elem: SoupTag) -> tuple
 
     score = points + comments * 0.5
 
-    return (NewsItem(id=item_id, title=title, link=link), score)
+    return (NewsItem(id=item_id, title=title, url=url), score)

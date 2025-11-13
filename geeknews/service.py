@@ -33,7 +33,7 @@ async def _map_element(topic_elem: SoupTag) -> tuple[NewsItem, float]:
     item_id = topic_elem.select_one(".vote > span")["id"][4:]  # remove 'vote' prefix
     item_id = int(item_id)
     title = topic_elem.select_one("h1").text.strip()
-    link = topic_elem.select_one(".topictitle a")["href"]
+    url = topic_elem.select_one(".topictitle a")["href"]
 
     points = topic_elem.select(".topicinfo span")[0].text
     points = int(points) if points else 0
@@ -43,4 +43,4 @@ async def _map_element(topic_elem: SoupTag) -> tuple[NewsItem, float]:
 
     score = points + comments * 0.5
 
-    return (NewsItem(id=item_id, title=title, link=link), score)
+    return (NewsItem(id=item_id, title=title, url=url), score)
