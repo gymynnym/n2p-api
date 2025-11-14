@@ -1,8 +1,10 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import FileResponse
+from common.depends import get_redis
 from common.schemas import ResponseModel
 from starlette import status
 from podcast import service as podcast_service
+from redis import asyncio as aioredis
 
 
 router = APIRouter(prefix="/podcasts", tags=["Podcasts"])
@@ -26,3 +28,9 @@ async def get_podcast_audio(filename: str):
         filename=f"{filename}.mp3",
         media_type="application/octet-stream",
     )
+
+
+@router.delete("/{filename}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_podcast(filename: str, r: aioredis.Redis = Depends(get_redis)):
+    await podcast_service.delete_podcast(r, filename)
+    return

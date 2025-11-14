@@ -6,6 +6,8 @@ from fastapi import HTTPException
 from google.cloud import texttospeech
 from openai import OpenAI
 from redis import asyncio as aioredis
+from hackernews import service as hackernews_service
+from geeknews import service as geeknews_service
 
 oai_client = OpenAI()
 tts_client = texttospeech.TextToSpeechClient()
@@ -142,3 +144,14 @@ async def get_podcast_filepath(filename: str):
         raise HTTPException(status_code=404, detail="File not found.")
 
     return filepath
+
+
+async def delete_podcast(r: aioredis.Redis, filename: str):
+    filepath_txt = os.path.join("output", "podcasts", f"{filename}.txt")
+    filepath_mp3 = os.path.join("output", "podcasts", f"{filename}.mp3")
+    if os.path.exists(filepath_txt):
+        os.remove(filepath_txt)
+    if os.path.exists(filepath_mp3):
+        os.remove(filepath_mp3)
+    await r.zrem(hackernews_service.HACKERNEWS_PODCASTS_KEY, filename)
+    await r.zrem(geeknews_service.GEEKNEWS_PODCASTS_KEY, filename)
