@@ -6,5 +6,9 @@ dist/
 wheels/
 *.egg-info
 
+# Output files
+output/*
+!output/.gitkeep
+
 # Virtual environments
 .venv

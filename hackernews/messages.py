@@ -1,1 +1,1 @@
-GET_SUCCESS = "Hacker News item retrieved successfully."
+GET_SUCCESS = "HackerNews item retrieved successfully."
