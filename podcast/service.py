@@ -2,6 +2,7 @@ import asyncio
 import os
 from datetime import datetime
 from textwrap import dedent
+from fastapi import HTTPException
 from google.cloud import texttospeech
 from openai import OpenAI
 from redis import asyncio as aioredis
@@ -130,3 +131,14 @@ async def _write_audio_async(podcast_audio: bytes, output_path: str) -> None:
             out.write(podcast_audio)
 
     await _run_in_thread(_call)
+
+
+async def get_podcast_filepath(filename: str):
+    if not (filename.endswith(".txt") or filename.endswith(".mp3")):
+        raise HTTPException(status_code=400, detail="Invalid filename.")
+
+    filepath = os.path.join("output", "podcasts", filename)
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="File not found.")
+
+    return filepath

@@ -6,14 +6,30 @@ import re
 
 
 GEEKNEWS_URL = "https://news.hada.io/"
-GEEKNEWS_REDIS_KEY = "geeknews:items"
+GEEKNEWS_ITEMS_KEY = "geeknews:items"
+GEEKNEWS_PODCASTS_KEY = "geeknews:podcasts"
 
 
 async def get_top_items(r: aioredis.Redis, limit: int, page: int) -> list[NewsItem]:
     start, end = (page - 1) * limit, page * limit - 1
-    redis_data = await r.zrevrange(GEEKNEWS_REDIS_KEY, start, end)
+    redis_data = await r.zrevrange(GEEKNEWS_ITEMS_KEY, start, end)
     data = list(map(lambda item: NewsItem.model_validate_json(item), redis_data))
     return data
+
+
+async def get_top_item_urls(r: aioredis.Redis, limit: int) -> list[str]:
+    items = await get_top_items(r, limit, 1)
+    return [item.url for item in items]
+
+
+async def get_podcasts(
+    r: aioredis.Redis,
+    limit: int,
+    page: int,
+) -> list[str]:
+    start, end = (page - 1) * limit, page * limit - 1
+    redis_data = await r.zrevrange(GEEKNEWS_PODCASTS_KEY, start, end)
+    return [podcast for podcast in redis_data]
 
 
 async def scrap_items(r: aioredis.Redis) -> None:
@@ -24,9 +40,10 @@ async def scrap_items(r: aioredis.Redis) -> None:
 
     items = [_map_element(topic_elem) for topic_elem in topic_elems]
 
+    await r.delete(GEEKNEWS_ITEMS_KEY)
     for item in items:
         mapped_item, score = await item
-        await r.zadd(GEEKNEWS_REDIS_KEY, {mapped_item.model_dump_json(): score})
+        await r.zadd(GEEKNEWS_ITEMS_KEY, {mapped_item.model_dump_json(): score})
 
 
 async def _map_element(topic_elem: SoupTag) -> tuple[NewsItem, float]:

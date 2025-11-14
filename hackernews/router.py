@@ -24,6 +24,19 @@ async def get_top_items(
     )
 
 
+@router.get("/podcasts", response_model=ResponseModel[list[str]], status_code=status.HTTP_200_OK)
+async def get_podcasts(
+    r: aioredis.Redis = Depends(get_redis),
+    limit: int = Query(gt=0, default=20),
+    page: int = Query(gt=0, default=1),
+):
+    podcasts = await hackernews_service.get_podcasts(r, limit, page)
+    return ResponseModel(
+        data=podcasts,
+        message=hackernews_messages.PODCASTS_GET_SUCCESS,
+    )
+
+
 @router.post("/podcasts/generate", status_code=status.HTTP_201_CREATED)
 async def generate_podcast(request: GeneratePodcastRequest, r: aioredis.Redis = Depends(get_redis)):
     urls = await hackernews_service.get_top_item_urls(r, request.limit)
