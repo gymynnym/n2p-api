@@ -56,9 +56,13 @@ async def generate_podcast(
 
         yield STATUS_GENERATING_TEXT
         podcast_text = await _generate_podcast_text(text_model, url_bullets)
+        splited_podcast_text = _split_podcast_text(podcast_text)
 
         yield STATUS_GENERATING_AUDIO
-        podcast_audio = await _generate_podcast_audio(tts_model, podcast_text)
+        podcast_audios = await asyncio.gather(
+            *[_generate_podcast_audio(tts_model, chunk) for chunk in splited_podcast_text]
+        )
+        podcast_audio = b"".join(podcast_audios)
 
         yield STATUS_UPLOADING
         timestamp = int(datetime.now().timestamp())
@@ -94,6 +98,31 @@ async def _generate_podcast_text(model: str, url_bullets: str) -> str:
         return res.output_text
 
     return await _run_in_thread(_call)
+
+
+def _split_podcast_text(text: str, max_bytes: int = 4000, encoding: str = "utf-8") -> list[str]:
+    chunks: list[str] = []
+    current_lines: list[str] = []
+    current_size = 0
+
+    for line in text.splitlines(keepends=True):
+        line_size = len(line.encode(encoding))
+
+        if line_size > max_bytes:
+            raise ValueError("Single line exceeds max_bytes limit.")
+
+        if current_size + line_size > max_bytes and current_lines:
+            chunks.append("".join(current_lines))
+            current_lines = [line]
+            current_size = line_size
+        else:
+            current_lines.append(line)
+            current_size += line_size
+
+    if current_lines:
+        chunks.append("".join(current_lines))
+
+    return chunks
 
 
 async def _generate_podcast_audio(model: str, podcast_text: str) -> bytes:
