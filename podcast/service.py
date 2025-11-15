@@ -55,10 +55,6 @@ PODCAST_TEXT_GENERATE_INSTRUCTIONS = dedent("""
 ...(이하 생략)
 """).strip()
 
-PODCAST_AUDIO_GENERATE_INSTRUCTIONS = dedent("""
-최신 기술 뉴스 팟캐스트를 진행하는 두 명의 진행자 스타일로, 친근하고 생동감 있게 읽어주세요.
-""").strip()
-
 STATUS_PENDING = "pending"
 STATUS_GENERATING_TEXT = "generating_text"
 STATUS_GENERATING_AUDIO = "generating_audio"
@@ -153,7 +149,7 @@ def _split_podcast_text(text: str, max_bytes: int = 4000, encoding: str = "utf-8
 
 async def _generate_podcast_audio(model: str, podcast_text: str) -> bytes:
     def _call():
-        synthesis_input = texttospeech.SynthesisInput(text=podcast_text, prompt=PODCAST_AUDIO_GENERATE_INSTRUCTIONS)
+        synthesis_input = texttospeech.SynthesisInput(text=podcast_text)
         speaker_voice_configs = [
             texttospeech.MultispeakerPrebuiltVoice(speaker_alias="Speaker1", speaker_id="Kore"),
             texttospeech.MultispeakerPrebuiltVoice(speaker_alias="Speaker2", speaker_id="Charon"),
