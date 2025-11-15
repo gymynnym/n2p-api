@@ -1,6 +1,6 @@
 [project]
 name = "n2p-api"
-version = "0.1.0"
+version = "0.1.1"
 description = "The api server for the n2p(news-to-podcasts) application."
 readme = "README.md"
 requires-python = ">=3.14"
