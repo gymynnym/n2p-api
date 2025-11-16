@@ -8,13 +8,17 @@ from geeknews import service as geeknews_service, messages as geeknews_messages,
 from podcast import service as podcast_service
 
 
-router = APIRouter(prefix="/geeknews", tags=["GeekNews"], lifespan=geeknews_lifespan.lifespan)
+router = APIRouter(
+    prefix="/geeknews",
+    tags=["GeekNews"],
+    lifespan=geeknews_lifespan.lifespan,
+)
 
 
 @router.get("/top", response_model=ResponseModel[list[NewsItem]], status_code=status.HTTP_200_OK)
 async def get_top_items(
     r: aioredis.Redis = Depends(get_redis),
-    limit: int = Query(gt=0, default=20),
+    limit: int = Query(gt=0, le=30, default=20),
     page: int = Query(gt=0, default=1),
 ):
     data = await geeknews_service.get_top_items(r, limit, page)
@@ -27,7 +31,7 @@ async def get_top_items(
 @router.get("/podcasts", response_model=ResponseModel[list[str]], status_code=status.HTTP_200_OK)
 async def get_podcasts(
     r: aioredis.Redis = Depends(get_redis),
-    limit: int = Query(gt=0, default=20),
+    limit: int = Query(gt=0, le=30, default=20),
     page: int = Query(gt=0, default=1),
 ):
     podcasts = await geeknews_service.get_podcasts(r, limit, page)

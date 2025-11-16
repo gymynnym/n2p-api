@@ -19,8 +19,3 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["Authorization"],
 )
-
-
-@app.get("/")
-def say_hello():
-    return "Hello, World!"

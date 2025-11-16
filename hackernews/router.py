@@ -8,13 +8,17 @@ from hackernews import service as hackernews_service, messages as hackernews_mes
 from podcast import service as podcast_service
 
 
-router = APIRouter(prefix="/hackernews", tags=["HackerNews"], lifespan=hackernews_lifespan.lifespan)
+router = APIRouter(
+    prefix="/hackernews",
+    tags=["HackerNews"],
+    lifespan=hackernews_lifespan.lifespan,
+)
 
 
 @router.get("/top", response_model=ResponseModel[list[NewsItem]], status_code=status.HTTP_200_OK)
 async def get_top_items(
     r: aioredis.Redis = Depends(get_redis),
-    limit: int = Query(gt=0, default=20),
+    limit: int = Query(gt=0, le=30, default=20),
     page: int = Query(gt=0, default=1),
 ):
     data = await hackernews_service.get_top_items(r, limit, page)
@@ -27,7 +31,7 @@ async def get_top_items(
 @router.get("/podcasts", response_model=ResponseModel[list[str]], status_code=status.HTTP_200_OK)
 async def get_podcasts(
     r: aioredis.Redis = Depends(get_redis),
-    limit: int = Query(gt=0, default=20),
+    limit: int = Query(gt=0, le=30, default=20),
     page: int = Query(gt=0, default=1),
 ):
     podcasts = await hackernews_service.get_podcasts(r, limit, page)
